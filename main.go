@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/caarlos0/env/v11"
+	"github.com/nuric/go-api-template/handlers"
 	"github.com/nuric/go-api-template/utils"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -49,7 +50,7 @@ func main() {
 		utils.Encode(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
 	/* Add your handlers here */
-	mux.HandleFunc("/greetings", GreetingHandler)
+	mux.HandleFunc("/greetings", handlers.GreetingHandler)
 	/* Then add your middleware in **reverse order** */
 	// ---------------------------
 	server := &http.Server{
