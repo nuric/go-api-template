@@ -1,5 +1,16 @@
 @baseUrl = http://localhost:8080
+
 ###
 
 # Health Check
 GET {{baseUrl}}/healthz HTTP/1.1
+
+###
+
+# Greetings
+POST {{baseUrl}}/greetings HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Gandalf"
+}

@@ -49,6 +49,8 @@ func main() {
 		utils.Encode(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
 	/* Add your handlers here */
+	mux.HandleFunc("/greetings", GreetingHandler)
+	/* Then add your middleware in **reverse order** */
 	// ---------------------------
 	server := &http.Server{
 		Addr:    ":" + strconv.Itoa(cfg.Port),
