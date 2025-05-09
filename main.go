@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/caarlos0/env/v11"
-	"github.com/nuric/go-api-template/handlers"
 	"github.com/nuric/go-api-template/middleware"
+	"github.com/nuric/go-api-template/routes"
 	"github.com/nuric/go-api-template/utils"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -51,7 +51,7 @@ func main() {
 		utils.Encode(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
 	// Our API routes
-	mux.Handle("/", handlers.SetupRoutes())
+	mux.Handle("/", routes.SetupRoutes())
 	// Middleware
 	var handler http.Handler = mux
 	handler = middleware.ZeroLoggerMetrics(handler)

@@ -1,4 +1,4 @@
-package handlers_test
+package routes_test
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/nuric/go-api-template/handlers"
+	"github.com/nuric/go-api-template/routes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,7 +32,7 @@ func makeRequest(t *testing.T, method string, endpoint string, body any, resp an
 	req.Header.Set("Content-Type", "application/json")
 	// ---------------------------
 	recorder := httptest.NewRecorder()
-	handler := handlers.SetupRoutes()
+	handler := routes.SetupRoutes()
 	handler.ServeHTTP(recorder, req)
 	// ---------------------------
 	if resp != nil {
@@ -46,10 +46,10 @@ func makeRequest(t *testing.T, method string, endpoint string, body any, resp an
 
 func Test_Greetings(t *testing.T) {
 	// ---------------------------
-	reqBody := handlers.GreetingRequest{
+	reqBody := routes.GreetingRequest{
 		LastName: "Wizard",
 	}
-	var respBody handlers.GreetingResponse
+	var respBody routes.GreetingResponse
 	resp := makeRequest(t, http.MethodPost, "/greetings/Gandalf", reqBody, &respBody)
 	require.Equal(t, http.StatusOK, resp)
 	require.Equal(t, "Hello, Gandalf Wizard!", respBody.Greeting)
