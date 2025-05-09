@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -15,9 +16,9 @@ import (
 )
 
 type Config struct {
-	PrettyLogOutput bool   `env:"PRETTY_LOG_OUTPUT" envDefault:"true"`
-	Debug           bool   `env:"DEBUG" envDefault:"true"`
-	HttpAddr        string `env:"HTTP_ADDR" envDefault:":8080"`
+	PrettyLogOutput bool `env:"PRETTY_LOG_OUTPUT" envDefault:"true"`
+	Debug           bool `env:"DEBUG" envDefault:"true"`
+	Port            int  `env:"PORT" envDefault:"8080"`
 }
 
 func main() {
@@ -51,7 +52,7 @@ func main() {
 	})
 	// ---------------------------
 	server := &http.Server{
-		Addr:    cfg.HttpAddr,
+		Addr:    ":" + strconv.Itoa(cfg.Port),
 		Handler: mux,
 	}
 	go func() {
