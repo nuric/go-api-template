@@ -42,14 +42,13 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 		log.Debug().Interface("config", cfg).Msg("Configuration")
 	}
-	// ---------------------------
 	log.Debug().Msg("Debug mode enabled")
 	// ---------------------------
 	mux := http.NewServeMux()
-	// ---------------------------
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		utils.Encode(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
+	/* Add your handlers here */
 	// ---------------------------
 	server := &http.Server{
 		Addr:    ":" + strconv.Itoa(cfg.Port),
