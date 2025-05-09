@@ -11,6 +11,7 @@ import (
 
 	"github.com/caarlos0/env/v11"
 	"github.com/nuric/go-api-template/handlers"
+	"github.com/nuric/go-api-template/middleware"
 	"github.com/nuric/go-api-template/utils"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -46,16 +47,19 @@ func main() {
 	log.Debug().Msg("Debug mode enabled")
 	// ---------------------------
 	mux := http.NewServeMux()
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		utils.Encode(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
-	/* Add your handlers here */
-	mux.HandleFunc("/greetings", handlers.GreetingHandler)
-	/* Then add your middleware in **reverse order** */
+	// Our API routes
+	mux.Handle("/", handlers.SetupRoutes())
+	// Middleware
+	var handler http.Handler = mux
+	handler = middleware.ZeroLoggerMetrics(handler)
+	handler = middleware.Recover(handler)
 	// ---------------------------
 	server := &http.Server{
 		Addr:    ":" + strconv.Itoa(cfg.Port),
-		Handler: mux,
+		Handler: handler,
 	}
 	go func() {
 		log.Info().Str("httpAddr", server.Addr).Msg("HTTPAPI.Serve")

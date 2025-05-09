@@ -7,6 +7,12 @@ import (
 	"github.com/nuric/go-api-template/utils"
 )
 
+func SetupRoutes() http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /greetings/{firstName}", GreetingHandler)
+	return mux
+}
+
 /* Key things to note:
 - Request and response types are nearby the handler for easy debugging, you know
 what is coming and going.
@@ -14,7 +20,7 @@ what is coming and going.
 */
 
 type GreetingRequest struct {
-	Name string `json:"name"`
+	LastName string `json:"lastName"`
 }
 
 type GreetingResponse struct {
@@ -22,8 +28,8 @@ type GreetingResponse struct {
 }
 
 func (r GreetingRequest) Validate() error {
-	if r.Name == "" {
-		return fmt.Errorf("name is required")
+	if r.LastName == "" {
+		return fmt.Errorf("last name is required")
 	}
 	return nil
 }
@@ -38,9 +44,15 @@ func GreetingHandler(w http.ResponseWriter, r *http.Request) {
 		utils.Encode(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
+	// Do path validation here.
+	firstName := r.PathValue("firstName")
+	if len(firstName) < 2 {
+		utils.Encode(w, http.StatusBadRequest, map[string]string{"error": "first name must be at least 2 characters"})
+		return
+	}
 	// Construct the response and encode as JSON.
 	response := GreetingResponse{
-		Greeting: fmt.Sprintf("Hello, %s!", req.Name),
+		Greeting: fmt.Sprintf("Hello, %s %s!", firstName, req.LastName),
 	}
 	utils.Encode(w, http.StatusOK, response)
 }

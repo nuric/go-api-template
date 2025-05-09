@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func makeRequest(t *testing.T, hf http.HandlerFunc, method string, endpoint string, body any, resp any) int {
+func makeRequest(t *testing.T, method string, endpoint string, body any, resp any) int {
 	t.Helper()
 	// ---------------------------
 	var bodyReader io.Reader
@@ -32,7 +32,8 @@ func makeRequest(t *testing.T, hf http.HandlerFunc, method string, endpoint stri
 	req.Header.Set("Content-Type", "application/json")
 	// ---------------------------
 	recorder := httptest.NewRecorder()
-	hf(recorder, req)
+	handler := handlers.SetupRoutes()
+	handler.ServeHTTP(recorder, req)
 	// ---------------------------
 	if resp != nil {
 		err = json.Unmarshal(recorder.Body.Bytes(), resp)
@@ -46,16 +47,22 @@ func makeRequest(t *testing.T, hf http.HandlerFunc, method string, endpoint stri
 func Test_Greetings(t *testing.T) {
 	// ---------------------------
 	reqBody := handlers.GreetingRequest{
-		Name: "Gandalf",
+		LastName: "Wizard",
 	}
 	var respBody handlers.GreetingResponse
-	resp := makeRequest(t, handlers.GreetingHandler, http.MethodPost, "/greetings", reqBody, &respBody)
+	resp := makeRequest(t, http.MethodPost, "/greetings/Gandalf", reqBody, &respBody)
 	require.Equal(t, http.StatusOK, resp)
-	require.Equal(t, respBody.Greeting, "Hello, Gandalf!")
+	require.Equal(t, "Hello, Gandalf Wizard!", respBody.Greeting)
 	// ---------------------------
-	// Empty name should return 400
-	reqBody.Name = ""
-	resp = makeRequest(t, handlers.GreetingHandler, http.MethodPost, "/greetings", reqBody, nil)
+	// Empty first name should be at least 2 characters
+	var errResp map[string]string
+	resp = makeRequest(t, http.MethodPost, "/greetings/g", reqBody, &errResp)
+	require.Equal(t, http.StatusBadRequest, resp)
+	require.Equal(t, "first name must be at least 2 characters", errResp["error"])
+	// ---------------------------
+	// Empty last name should return 400
+	reqBody.LastName = ""
+	resp = makeRequest(t, http.MethodPost, "/greetings/Gandalf", reqBody, nil)
 	require.Equal(t, http.StatusBadRequest, resp)
 	// ---------------------------
 }

@@ -8,9 +8,9 @@ GET {{baseUrl}}/healthz HTTP/1.1
 ###
 
 # Greetings
-POST {{baseUrl}}/greetings HTTP/1.1
+POST {{baseUrl}}/greetings/Gandalf HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "Gandalf"
+  "lastName": "Wizard"
 }

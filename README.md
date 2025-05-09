@@ -4,6 +4,7 @@ This is a template for creating RESTful APIs in Go using the standard library as
 
 - Standard library HTTP server with routing
 - Middleware using HTTP handlers including recovery and logging
+- Standard library testing for handlers
 - JSON encoding and decoding
 - For convenience, logging and environment variable based configuration
 
