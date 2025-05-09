@@ -8,11 +8,42 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/caarlos0/env/v11"
 	"github.com/nuric/go-api-template/utils"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
+type Config struct {
+	PrettyLogOutput bool   `env:"PRETTY_LOG_OUTPUT" envDefault:"true"`
+	Debug           bool   `env:"DEBUG" envDefault:"true"`
+	HttpAddr        string `env:"HTTP_ADDR" envDefault:":8080"`
+}
+
 func main() {
+	// ---------------------------
+	// Setup config
+	var cfg Config
+	if err := env.Parse(&cfg); err != nil {
+		log.Fatal().Err(err).Msg("Failed to parse environment variables")
+	}
+	// ---------------------------
+	// Setup logging
+	// UNIX Time is faster and smaller than most timestamps
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	// ---------------------------
+	// Default level for this example is info, unless debug flag is present
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	if cfg.PrettyLogOutput {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+	}
+	if cfg.Debug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		log.Debug().Interface("config", cfg).Msg("Configuration")
+	}
+	// ---------------------------
+	log.Debug().Msg("Debug mode enabled")
+	// ---------------------------
 	mux := http.NewServeMux()
 	// ---------------------------
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +51,7 @@ func main() {
 	})
 	// ---------------------------
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    cfg.HttpAddr,
 		Handler: mux,
 	}
 	go func() {
@@ -42,6 +73,6 @@ func main() {
 		log.Error().Err(err).Msg("Server forced to shutdown")
 	}
 	cancel()
-	log.Info().Msg("Server gracefully stopped")
+	log.Info().Msg("Server stopped")
 
 }
