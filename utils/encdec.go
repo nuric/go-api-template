@@ -24,11 +24,18 @@ func Encode[T any](w http.ResponseWriter, status int, v T) {
 	if err := json.NewEncoder(&buf).Encode(v); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Error().Err(err).Msg("could not encode response")
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		if errErr := json.NewEncoder(w).Encode(map[string]string{"error": err.Error()}); errErr != nil {
+			log.Error().Err(errErr).Msg("could not encode error response")
+			http.Error(w, "could not encode error response", http.StatusInternalServerError)
+		}
 		return
 	}
 	w.WriteHeader(status)
-	w.Write(buf.Bytes())
+	if size, err := w.Write(buf.Bytes()); size != len(buf.Bytes()) || err != nil {
+		log.Error().Err(err).Msg("could not write response")
+		http.Error(w, "could not write response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // DecodeValid decodes the request body into the object and then validates it.
